@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Scanner;
 
 public class guanQingManage {
-
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
         Scanner sc = new Scanner(System.in);
         //注册驱动
@@ -48,18 +47,27 @@ public class guanQingManage {
         //单个查询（学号）
         queryMember(conn, "2023123123");
 
-        //全部查询（学号）、
+        //全部查询（学号）
         queryAllMember(conn);*/
 
         conn.close();
 
     }
 
-
+    //增加成员
     private static boolean addMember(Connection conn, String name, String stuId,
                                      String post, String college, String email, String phone) throws SQLException {
         String sql = "insert into t_member(c_name, c_stu_id, c_post, c_college, c_email, c_phone) value(?, ?, ?, ?, ?, ?);";
         PreparedStatement pstat = conn.prepareStatement(sql);
+        String regex1="1\\d{10}";
+        String regex2=".+@.+";
+        if(!email.matches(regex2)){
+            System.out.println("邮箱格式有误！");
+        }
+        if(!phone.matches(regex1)){
+            System.out.println("手机号格式有误！");
+            return false;
+        }
         try {
             pstat.setString(1, name);
             pstat.setString(2, stuId);
@@ -78,7 +86,7 @@ public class guanQingManage {
         System.out.println("增加失败！");
         return false;
     }
-
+    //删除成员（学号）
     private static boolean deleteMember(Connection conn, String stuId) throws SQLException {
         String sql = "DELETE FROM t_member WHERE c_stu_id = ?;";
             PreparedStatement pstat = conn.prepareStatement(sql);
@@ -92,6 +100,7 @@ public class guanQingManage {
         return false;
     }
 
+    //查询单个成员（学号）
     private static boolean queryMember(Connection conn, String stuId) throws SQLException {
         String sql = "SELECT * FROM t_member WHERE c_stu_id = ?";
         PreparedStatement pstat = conn.prepareStatement(sql);
@@ -109,6 +118,7 @@ public class guanQingManage {
         return false;
     }
 
+    //查询全部成员
     private static boolean queryAllMember(Connection conn) throws SQLException {
         String sql = "SELECT * FROM t_member ;";
         Statement stat = conn.createStatement();
@@ -130,6 +140,7 @@ public class guanQingManage {
         }
     }
 
+    //从数据源读取数据，返回成员类
     private static Member getmessage(ResultSet rs) throws SQLException {
         String c_id = rs.getString("c_id");
         Integer id = Integer.parseInt(c_id);
