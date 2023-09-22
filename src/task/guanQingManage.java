@@ -29,7 +29,7 @@ public class guanQingManage {
         String phone = "";
 
         //增加
-        /*addMember(conn, "超人强", "2023123123", "技术组组长",
+        addMember(conn, "超人强", "2023123123", "技术组组长",
                 "计算机学院计科一班", "123@qq.com", "12345678901");
 
         addMember(conn, "GG bond", "2023123124", "技术组后端开发",
@@ -40,33 +40,33 @@ public class guanQingManage {
 
         addMember(conn, "lzb", "2022414130", "技术组后端开发",
                 "网工1班", "2663058456@qq.com", "13688888888");
-
         //删除（学号）
         deleteMember(conn, "2022414130");
 
         //单个查询（学号）
         queryMember(conn, "2023123123");
 
+        //更新姓名
+        updateMember(conn,"2023123123","超人强pro");
+
         //全部查询（学号）
-        queryAllMember(conn);*/
+        queryAllMember(conn);
 
         conn.close();
-
     }
 
     //增加成员
-    private static boolean addMember(Connection conn, String name, String stuId,
-                                     String post, String college, String email, String phone) throws SQLException {
+    private static void addMember(Connection conn, String name, String stuId,
+                                  String post, String college, String email, String phone) throws SQLException {
         String sql = "insert into t_member(c_name, c_stu_id, c_post, c_college, c_email, c_phone) value(?, ?, ?, ?, ?, ?);";
         PreparedStatement pstat = conn.prepareStatement(sql);
-        String regex1="1\\d{10}";
-        String regex2=".+@.+";
-        if(!email.matches(regex2)){
+        String regex1 = "1\\d{10}";
+        String regex2 = ".+@.+";
+        if (!email.matches(regex2)) {
             System.out.println("邮箱格式有误！");
         }
-        if(!phone.matches(regex1)){
+        if (!phone.matches(regex1)) {
             System.out.println("手机号格式有误！");
-            return false;
         }
         try {
             pstat.setString(1, name);
@@ -78,48 +78,50 @@ public class guanQingManage {
             if (pstat.executeUpdate() > 0) {
                 pstat.close();
                 System.out.println("成员增加成功！");
-                return true;
+            }else{
+                System.out.println("增加失败！");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("增加失败！");
-        return false;
+
     }
+
     //删除成员（学号）
-    private static boolean deleteMember(Connection conn, String stuId) throws SQLException {
+    private static void deleteMember(Connection conn, String stuId) throws SQLException {
         String sql = "DELETE FROM t_member WHERE c_stu_id = ?;";
-            PreparedStatement pstat = conn.prepareStatement(sql);
-            pstat.setString(1, stuId);
-            if (pstat.executeUpdate() > 0) {
-                System.out.println("删除成功！");
-                pstat.close();
-                return true;
-            }
-        System.out.println("查无此学号成员，删除失败！");
-        return false;
+        PreparedStatement pstat = conn.prepareStatement(sql);
+        pstat.setString(1, stuId);
+        if (pstat.executeUpdate() > 0) {
+            System.out.println("删除成功！");
+            pstat.close();
+        }else{
+            System.out.println("查无此学号成员，删除失败！");
+        }
     }
 
     //查询单个成员（学号）
-    private static boolean queryMember(Connection conn, String stuId) throws SQLException {
+    private static void queryMember(Connection conn, String stuId) throws SQLException {
+        boolean found=false;
         String sql = "SELECT * FROM t_member WHERE c_stu_id = ?";
         PreparedStatement pstat = conn.prepareStatement(sql);
         pstat.setString(1, stuId);
         ResultSet rs = pstat.executeQuery();
         while (rs.next()) {
-            System.out.println("学号为"+stuId+"成员查询成功！");
+            System.out.println("学号为" + stuId + "成员查询成功！");
             Member m = getmessage(rs);
             System.out.println(m);
-            pstat.close();
-            rs.close();
-            return true;
+            found=true;
         }
-        System.out.println("不存在此成员！");
-        return false;
+        if (!found) {
+            System.out.println("查无此学号成员！");
+        }
+        pstat.close();
+        rs.close();
     }
 
     //查询全部成员
-    private static boolean queryAllMember(Connection conn) throws SQLException {
+    private static void queryAllMember(Connection conn) throws SQLException {
         String sql = "SELECT * FROM t_member ;";
         Statement stat = conn.createStatement();
         ResultSet rs = stat.executeQuery(sql);
@@ -133,12 +135,30 @@ public class guanQingManage {
                 System.out.println(m);
             }
             rs.close();
-            return true;
         } else {
             System.out.println("无任何成员！");
-            return false;
         }
     }
+
+    // 更新成员信息(根据学号修改姓名)
+    public static void updateMember(Connection conn, String stuId, String newName) throws SQLException {
+        String sql = "UPDATE t_member SET c_name = ? WHERE c_stu_id = ?";
+        PreparedStatement pstat = conn.prepareStatement(sql);
+        try {
+            pstat.setString(1, newName);
+            pstat.setString(2, stuId);
+            if (pstat.executeUpdate() > 0) {
+                System.out.println("修改姓名成功！");
+                pstat.close();
+            }else {
+                System.out.println("未找到匹配的学号记录，修改失败！");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        pstat.close();
+    }
+
 
     //从数据源读取数据，返回成员类
     private static Member getmessage(ResultSet rs) throws SQLException {
