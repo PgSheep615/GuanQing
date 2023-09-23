@@ -1,0 +1,16 @@
+create database liao;
+
+use liao;
+
+drop table if exists t_member;
+CREATE TABLE t_member (
+    c_id INT AUTO_INCREMENT PRIMARY KEY,
+    c_name VARCHAR(50) NOT NULL,
+    c_stu_id VARCHAR(20) UNIQUE NOT NULL,
+    c_post VARCHAR(50),
+    c_college VARCHAR(50),
+    -- 其他自定义字段
+    c_email VARCHAR(50),
+    c_phone VARCHAR(20)
+);
+
